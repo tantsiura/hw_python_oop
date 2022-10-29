@@ -82,6 +82,7 @@ class SportsWalking(Training):
     CALORIES_WEIGHT_MULTIPLIER: float = 0.035
     CALORIES_SPEED_HEIGHT_MULTIPLIER: float = 0.029
     KMH_IN_MSEC: float = 0.278
+    CM_IN_M: int = 100
 
     def __init__(self,
                  action: int,
@@ -95,9 +96,10 @@ class SportsWalking(Training):
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
         speed_square = (self.get_mean_speed() * self.KMH_IN_MSEC) ** 2
+        height_in_m = self.height / 100
 
         spent_calories = (self.CALORIES_WEIGHT_MULTIPLIER * self.weight
-                          + (speed_square / self.height)
+                          + (speed_square / height_in_m)
                           * self.CALORIES_SPEED_HEIGHT_MULTIPLIER
                           * self.weight) * self.duration * self.MIN_IN_H
         return spent_calories
