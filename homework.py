@@ -1,20 +1,15 @@
 from typing import List, Union
+from dataclasses import dataclass
 
 
+@dataclass
 class InfoMessage:
     """Информационное сообщение о тренировке."""
-
-    def __init__(self,
-                 training_type: str,
-                 duration: float,
-                 distance: float,
-                 speed: float,
-                 calories: float) -> None:
-        self.training_type = training_type
-        self.duration = duration
-        self.distance = distance
-        self.speed = speed
-        self.calories = calories
+    training_type: str
+    duration: float
+    distance: float
+    speed: float
+    calories: float
 
     def get_message(self) -> str:
         return (f'Тип тренировки: {self.training_type}; '
@@ -41,8 +36,7 @@ class Training:
 
     def get_distance(self) -> float:
         """Получить дистанцию в км."""
-        distance = (self.action * self.LEN_STEP) / self.M_IN_KM
-        return distance
+        return ((self.action * self.LEN_STEP) / self.M_IN_KM)
 
     def get_mean_speed(self) -> float:
         """Получить среднюю скорость движения."""
@@ -69,11 +63,13 @@ class Running(Training):
     CALORIES_MEAN_SPEED_SHIFT: float = 1.79
 
     def get_spent_calories(self) -> float:
-        spent_calories = ((self.CALORIES_MEAN_SPEED_MULTIPLIER
-                          * self.get_mean_speed()
-                          + self.CALORIES_MEAN_SPEED_SHIFT)
-                          * self.weight / self.M_IN_KM
-                          * self.duration * self.MIN_IN_H)
+        spent_calories = (
+            (self.CALORIES_MEAN_SPEED_MULTIPLIER
+             * self.get_mean_speed() + self.CALORIES_MEAN_SPEED_SHIFT)
+            * self.weight
+            / self.M_IN_KM
+            * self.duration
+            * self.MIN_IN_H)
         return spent_calories
 
 
@@ -96,12 +92,14 @@ class SportsWalking(Training):
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
         speed_square = (self.get_mean_speed() * self.KMH_IN_MSEC) ** 2
-        height_in_m = self.height / 100
+        height_in_m = self.height / self.CM_IN_M
 
-        spent_calories = (self.CALORIES_WEIGHT_MULTIPLIER * self.weight
-                          + (speed_square / height_in_m)
-                          * self.CALORIES_SPEED_HEIGHT_MULTIPLIER
-                          * self.weight) * self.duration * self.MIN_IN_H
+        spent_calories = (
+            (self.CALORIES_WEIGHT_MULTIPLIER * self.weight
+             + (speed_square / height_in_m)
+             * self.CALORIES_SPEED_HEIGHT_MULTIPLIER
+             * self.weight)
+            * self.duration * self.MIN_IN_H)
         return spent_calories
 
 
@@ -124,16 +122,17 @@ class Swimming(Training):
 
     def get_mean_speed(self) -> float:
         """Получить среднюю скорость движения."""
-        mean_speed = (((self.length_pool * self.count_pool)
-                      / self.M_IN_KM) / self.duration)
+        mean_speed = (
+            ((self.length_pool * self.count_pool) / self.M_IN_KM)
+            / self.duration)
         return mean_speed
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
-        spent_calories = ((self.get_mean_speed()
-                          + self.CALORIES_MEAN_SPEED_SHIFT)
-                          * self.CALORIES_WEIGHT_MULTIPLIER * self.weight
-                          * self.duration)
+        spent_calories = (
+            (self.get_mean_speed() + self.CALORIES_MEAN_SPEED_SHIFT)
+            * self.CALORIES_WEIGHT_MULTIPLIER
+            * self.weight * self.duration)
         return spent_calories
 
 
@@ -143,7 +142,10 @@ def read_package(workout_type: str, data: List[Union[int, float]]) -> Training:
                      'RUN': Running,
                      'WLK': SportsWalking}
     if workout_type not in all_trainings:
-        print('Ошибка')
+        raise ValueError('''
+        Данный тренер не поддерживает активность,
+        данные по которой были переданы.
+        ''')
     return all_trainings[workout_type](*data)
 
 
